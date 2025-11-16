@@ -47,9 +47,14 @@ class Disciplina(BaseModel):
         from_attributes=True
 
 class DisciplinaCreate(BaseModel):
-    nome: str
-    descricao: str
-    professor: ProfessorCreate
+    nome: str = None
+    descricao: str = None
+    professor: Optional[ProfessorCreate] = None
+
+class DisciplinaUpdate(BaseModel):
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    professor: Optional[ProfessorCreate] = None
 
 class Matricula(BaseModel):
     id: int

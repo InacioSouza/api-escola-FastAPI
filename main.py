@@ -118,12 +118,49 @@ def altera_professor(id: int, professor: schemas.ProfessorCreate, db: Session = 
 
 @app.post("/disciplinas/", response_model=schemas.Disciplina)
 def create_disciplina(disciplina: schemas.DisciplinaCreate, db: Session = Depends(get_db)):
-    disciplina_db = models.Disciplina(**disciplina.model_dump())
+    disciplina_db = models.Disciplina(
+        nome=disciplina.nome, 
+        descricao=disciplina.descricao    
+    )
+
+    if disciplina.professor:
+        disciplina_db.professor = models.Professor(**disciplina.professor.model_dump().items())
+
     db.add(disciplina_db)
     db.commit()
     db.refresh(disciplina_db)
     return disciplina_db
 
+@app.get("/disciplinas/", response_model=List[schemas.Disciplina])
+def get_all_disciplinas(db: Session = Depends(get_db)):
+    list_disciplina = db.query(models.Disciplina).options(
+        joinedload(models.Disciplina.professor)
+    ).all()
+    return list_disciplina 
+
+@app.get("/disciplinas/{id}", response_model=schemas.Disciplina)
+def get_by_id_disciplina(id: int, db: Session = Depends(get_db)):
+    disciplina_db = db.query(models.Disciplina).filter(models.Disciplina.id == id).first()
+    if not disciplina_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Disciplina não encontrada"
+        )
+    return disciplina_db
+
 @app.put("/disciplinas/{id}", response_model=schemas.Disciplina)
-def altera_disciplina(id: int, disciplina: schemas.DisciplinaCreate):
-    print()
+def altera_disciplina(id: int, disciplina: schemas.DisciplinaUpdate, db: Session = Depends(get_db)):
+    disciplina_db = db.query(models.Disciplina).filter(models.Disciplina.id == id).first()
+
+    if not disciplina_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Disciplina não encontrada"
+        )
+    for key, value in disciplina.model_dump().items():
+        if value:
+            setattr(disciplina_db, key, value)
+    db.commit()
+    db.refresh(disciplina_db)
+    return disciplina_db
+
