@@ -56,6 +56,9 @@ class Matricula(Base):
     __tablename__="matriculas"
     id=Column(Integer, primary_key=True, index=True)
     disciplina_id=Column(Integer, ForeignKey("disciplinas.id"))
+    disciplina = relationship(
+        "Disciplina"
+    )
     estudante_id=Column(Integer, ForeignKey("estudantes.id"))
     estudante = relationship(
         "Estudante",
