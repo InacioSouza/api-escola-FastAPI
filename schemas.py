@@ -25,6 +25,7 @@ class PerfilUpdate(BaseModel):
 class Estudante(BaseModel):
     id: int
     nome: str
+    ativo: bool
     perfil: Perfil
 
     class Config:
@@ -38,6 +39,7 @@ class EstudanteCreate(BaseModel):
 class EstudanteUpdate(BaseModel):
     id: Optional[int] = None
     nome: Optional[str] = None
+    ativo: Optional[bool] = None
     email: Optional[str] = None
     perfil: Optional[PerfilUpdate] = None
 
@@ -46,12 +48,14 @@ class EstudanteUpdate(BaseModel):
 class Professor(BaseModel):
     id: int
     nome: str
+    ativo: bool
 
     class config:
         from_attributes=True
 
 class ProfessorCreate(BaseModel):
     nome: str
+    ativo: Optional[bool] = None
 
 class ProfessorUpdate(ProfessorCreate):
     id: Optional[int] = None
@@ -62,6 +66,7 @@ class Disciplina(BaseModel):
     nome: str
     descricao: str
     professor: Optional[Professor] = None
+    ativa: bool
 
     class config:
         from_attributes=True
@@ -74,6 +79,7 @@ class DisciplinaCreate(BaseModel):
 class DisciplinaUpdate(BaseModel):
     id: Optional[int] = None
     nome: Optional[str] = None
+    ativa: Optional[bool] = None
     descricao: Optional[str] = None
     professor: Optional[ProfessorUpdate] = None
 
@@ -82,6 +88,7 @@ class DisciplinaUpdate(BaseModel):
 class Matricula(BaseModel):
     id: int
     disciplina: Disciplina
+    ativa: bool
     estudante: Estudante
     data_matricula: date
 
@@ -94,4 +101,5 @@ class MatriculaUpdate(BaseModel):
     id: Optional[int] = None
     disciplina: Optional[DisciplinaUpdate] = None
     estudante: Optional[EstudanteUpdate] = None
+    ativa: Optional[bool] = None
     data_matricula: Optional[date] = None

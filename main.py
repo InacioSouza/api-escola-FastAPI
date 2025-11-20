@@ -24,7 +24,8 @@ def criar_estudante(
 ):
     db_estudante = models.Estudante(
         nome = estudante_create.nome,
-        perfil = models.Perfil(**estudante_create.perfil.model_dump())
+        perfil = models.Perfil(**estudante_create.perfil.model_dump()),
+        ativo=True
     )
     db.add(db_estudante)
     db.commit()
@@ -72,7 +73,7 @@ def criar_professor(
     professor: schemas.ProfessorCreate,
     db: Session = Depends(get_db)
 ):
-    db_professor = models.Professor(nome=professor.nome)
+    db_professor = models.Professor(nome=professor.nome, ativo=True)
     db.add(db_professor)
     db.commit()
     db.refresh(db_professor)
@@ -123,7 +124,8 @@ def altera_professor(id: int, professor: schemas.ProfessorUpdate, db: Session = 
 def criar_disciplina(disciplina: schemas.DisciplinaCreate, db: Session = Depends(get_db)):
     disciplina_db = models.Disciplina(
         nome=disciplina.nome, 
-        descricao=disciplina.descricao    
+        descricao=disciplina.descricao,
+        ativa=True   
     )
 
     if disciplina.id_professor:
@@ -196,6 +198,7 @@ def busca_por_id_matricula(id: int, db: Session = Depends(get_db)):
 def criar_matricula(matricula: schemas.MatriculaCreate, db: Session = Depends(get_db)):
     matricula_db = models.Matricula(
         data_matricula=matricula.data_matricula,
+        ativa=True
     )
 
     disciplina_db = db.query(models.Disciplina).filter(models.Disciplina.id == matricula.id_disciplina).first()

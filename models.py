@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, ForeignKey
+from sqlalchemy import Column, String, Integer, Date, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -7,6 +7,7 @@ class Estudante(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String)
     email = Column(String)
+    ativo = Column(Boolean)
     perfil = relationship(
         "Perfil",
         back_populates="estudante",
@@ -34,6 +35,7 @@ class Professor(Base):
     __tablename__ = "professores"
     id=Column(Integer, primary_key=True, index=True)
     nome=Column(String)
+    ativo = Column(Boolean)
     disciplinas=relationship(
         "Disciplina",
         back_populates="professor",
@@ -45,6 +47,7 @@ class Disciplina(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
     descricao = Column(String)
+    ativa = Column(Boolean)
     professor_id = Column(Integer, ForeignKey("professores.id"))
     professor = relationship(
         "Professor",
@@ -55,6 +58,7 @@ class Disciplina(Base):
 class Matricula(Base):
     __tablename__="matriculas"
     id=Column(Integer, primary_key=True, index=True)
+    ativa = Column(Boolean)
     disciplina_id=Column(Integer, ForeignKey("disciplinas.id"))
     disciplina = relationship(
         "Disciplina"
