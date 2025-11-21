@@ -69,3 +69,9 @@ class Matricula(Base):
         back_populates="matriculas"
     )
     data_matricula=Column(Date)
+
+class Usuario(Base):
+    __tablename__="usuarios"
+    id = Column(Integer, primary_key=True, index=True)
+    login = Column(String, unique=true, nullable=False, index=True)
+    senha = Column(String, nullable=False)

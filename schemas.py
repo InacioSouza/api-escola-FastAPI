@@ -92,6 +92,9 @@ class Matricula(BaseModel):
     estudante: Estudante
     data_matricula: date
 
+    class Config:
+        from_attributes=True
+
 class MatriculaCreate(BaseModel):
     id_disciplina: int
     id_estudante: int
@@ -103,3 +106,26 @@ class MatriculaUpdate(BaseModel):
     estudante: Optional[EstudanteUpdate] = None
     ativa: Optional[bool] = None
     data_matricula: Optional[date] = None
+
+    # ----------------------------- Schemas Usuario / Token -----------------------------
+class Usuario(BaseModel):
+    id: int
+    login: str
+    senha: str
+
+    class Config:
+       from_attributes=True
+
+class UsuarioCreate(BaseModel):
+    login: str
+    senha: str
+
+class UsuarioUpdate(BaseModel):
+    id: Optional[int] = None
+    login: str
+    senha: str
+
+class Token(BaseModel):
+    token: str
+    tipo = str = "bearer"
+    

@@ -1,9 +1,15 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
+from typing import List
+
 import models, schemas
 from database import engine, SessionLocal
-from typing import List
-from sqlalchemy.orm import joinedload
+from utils import hash_senha
+from auth import autenticar_usuario, cria_token, busca_usuario_atual
+
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -67,7 +73,7 @@ def altera_estudante(id: int, estudante_put: schemas.EstudanteUpdate, db: Sessio
     db.refresh(estudante)
     return estudante
 
-# ----------------------------- Schemas Professor -----------------------------
+# ----------------------------- Rotas Professor -----------------------------
 @app.post("/professores/", response_model=schemas.Professor)
 def criar_professor(
     professor: schemas.ProfessorCreate,
@@ -119,7 +125,7 @@ def altera_professor(id: int, professor: schemas.ProfessorUpdate, db: Session = 
     db.refresh(professor_db)
     return professor_db
 
-# ----------------------------- Schemas Disciplina -----------------------------
+# ----------------------------- Rotas Disciplina -----------------------------
 @app.post("/disciplinas/", response_model=schemas.Disciplina)
 def criar_disciplina(disciplina: schemas.DisciplinaCreate, db: Session = Depends(get_db)):
     disciplina_db = models.Disciplina(
@@ -176,7 +182,7 @@ def altera_disciplina(id: int, disciplina: schemas.DisciplinaUpdate, db: Session
     db.refresh(disciplina_db)
     return disciplina_db
 
-# ----------------------------- Schemas Matricula -----------------------------
+# ----------------------------- Rotas Matricula -----------------------------
 @app.get("/matriculas/", response_model=List[schemas.Matricula])
 def listar_matricula(db: Session = Depends(get_db)):
     list_matricula = db.query(models.Matricula).options(
@@ -223,3 +229,27 @@ def criar_matricula(matricula: schemas.MatriculaCreate, db: Session = Depends(ge
     db.commit()
     db.refresh(matricula_db)
     return matricula_db
+
+# ----------------------------- Rota Login -----------------------------
+
+@app.post("/usuarios/", response_model=schemas.Usuario)
+def criar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
+    hashed = hash_senha(usuario.senha)
+    db_usuario = models.Usuario(login=usuario.login, senha=hashed)
+    db.add(db_usuario)
+    db.commit()
+    db.refresh(db_usuario)
+    return db_usuario
+
+@app.post("/login", response_model=schemas.Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    usuario = autenticar_usuario(form_data.login, form_data.password, db)
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
+    token = cria_token({"sub": usuario.login})
+
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/me")
+def me(usuario_atual = Depends(busca_usuario_atual)):
+    return {"id": usuario_atual.id, "login": usuario_atual.login}
